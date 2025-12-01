@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NEWROA - Sistem Gacha Angka</title>
+
+    <style>
+      :root {
+        --bg-light: #f5f7fa;
+        --bg-card: #ffffff;
+        --text-dark: #333;
+        --text-muted: #6c757d;
+        --primary-blue: #007bff;
+        --primary-blue-dark: #0056b3;
+        --success-green: #28a745;
+        --danger-red: #dc3545;
+        --hadiah-gold: #ffc107;
+        --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+        --border-color: #dee2e6;
+      }
+
+      body {
+        font-family: "Poppins", sans-serif;
+        text-align: center;
+        background-color: var(--bg-light);
+        color: var(--text-dark);
+        padding: 20px;
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #main-container {
+        max-width: 1000px;
+        width: 100%;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: var(--bg-card);
+        border-radius: 16px;
+        box-shadow: var(--shadow-light);
+        border: 1px solid var(--border-color);
+      }
+
+      h1 {
+        color: var(--primary-blue-dark);
+        margin-bottom: 25px;
+        font-weight: 700;
+        font-size: 2.2em;
+      }
+
+      /* --- Koin & Link --- */
+      #koin-info-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 30px;
+        margin-bottom: 20px;
+        background-color: #eaf1f7;
+        border-radius: 10px;
+        border: 1px solid var(--primary-blue);
+      }
+
+      #koin-display {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #b38800; /* Darker gold */
+      }
+
+      #cari-koin-btn {
+        background-color: #00b894;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(0, 184, 148, 0.3);
+        transition: background-color 0.2s;
+      }
+
+      #cari-koin-btn:hover {
+        background-color: #00a88a;
+      }
+
+      /* --- Tombol Spin Utama --- */
+      #button-container {
+        display: flex;
+        justify-content: center;
+        gap: 25px;
+        margin-bottom: 30px;
+      }
+
+      .pull-button {
+        padding: 18px 40px;
+        font-size: 1.3em;
+        font-weight: 600;
+        cursor: pointer;
+        color: white;
+        border: none;
+        border-radius: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .pull-button:disabled {
+        background-color: var(--text-muted);
+        cursor: not-allowed;
+        opacity: 0.7;
+        box-shadow: none;
+      }
+
+      #pull-one {
+        background: linear-gradient(145deg, var(--success-green), #218838);
+      }
+
+      #pull-ten {
+        background: linear-gradient(145deg, var(--danger-red), #c82333);
+      }
+
+      .pull-button:hover:not(:disabled) {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      /* --- Tampilan Angka Hasil Spin --- */
+
+      #sisa-info {
+        margin: 15px 0 25px;
+        font-size: 1.1em;
+        color: var(--text-muted);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 15px;
+      }
+
+      #skip-button {
+        background-color: #6f42c1;
+        padding: 8px 15px;
+        font-size: 0.9em;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        color: white;
+        transition: all 0.2s ease-out;
+      }
+
+      #nomor-tampil-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin: 30px 0;
+        min-height: 120px;
+        padding: 25px;
+        border-radius: 12px;
+        background-color: var(--bg-light);
+        border: 1px solid var(--border-color);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+      }
+
+      #main-spinning-slot {
+        font-size: 6em;
+        font-weight: 900;
+        padding: 15px 45px;
+        border-radius: 15px;
+        background-color: var(--bg-card);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+        border: 3px solid var(--primary-blue);
+        color: var(--primary-blue-dark);
+        margin-bottom: 20px;
+      }
+
+      #main-spinning-slot.hadiah {
+        border-color: var(--hadiah-gold);
+        background-color: #fffde7;
+        color: #b38800;
+      }
+
+      #multi-result-display {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        min-height: 40px;
+      }
+
+      .result-item {
+        font-size: 1.3em;
+        font-weight: 600;
+        padding: 10px 18px;
+        border-radius: 8px;
+        background-color: var(--bg-card);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        animation: fadeIn 0.5s forwards;
+        border: 1px solid var(--border-color);
+        color: var(--text-dark);
+      }
+
+      .result-item.hadiah {
+        background-color: var(--hadiah-gold);
+        color: var(--text-dark);
+        border: 2px solid #e0a800;
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(255, 193, 7, 0.4);
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #toggle-list-button {
+        background: linear-gradient(
+          145deg,
+          var(--primary-blue),
+          var(--primary-blue-dark)
+        );
+        padding: 12px 25px;
+        font-size: 1em;
+        margin-top: 15px;
+        display: block;
+        width: fit-content;
+        margin-left: auto;
+        margin-right: auto;
+        color: white;
+        border-radius: 8px;
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .list-control-group {
+        background-color: #eaf1f7;
+        padding: 20px;
+        border-radius: 10px;
+        margin-top: 25px;
+        display: none;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+        border: 1px solid var(--border-color);
+      }
+
+      .list-control-group button {
+        padding: 10px 18px;
+        font-size: 0.95em;
+        border-radius: 6px;
+        color: white;
+        border: none;
+        cursor: pointer;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      #sort-list-button {
+        background-color: #17a2b8;
+      }
+      #full-shuffle-button {
+        background-color: #fd7e14;
+      }
+      #toggle-hadiah-group {
+        background-color: #6f42c1;
+      }
+
+      #nomor-list-container-wrapper {
+        display: none;
+        margin-top: 20px;
+      }
+
+      #nomor-list-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+        gap: 6px;
+        max-width: 900px;
+        margin: 20px auto;
+        border: 1px solid var(--border-color);
+        padding: 15px;
+        border-radius: 10px;
+        background-color: var(--bg-card);
+      }
+
+      .number-item {
+        padding: 7px 0;
+        border: 1px solid #ced4da;
+        border-radius: 5px;
+        background-color: #f8f9fa;
+        font-size: 0.9em;
+        font-weight: 500;
+        color: var(--text-dark);
+      }
+
+      .number-item.pulled {
+        background-color: #e9ecef;
+        color: var(--text-muted);
+        opacity: 0.7;
+        text-decoration: line-through;
+        border-color: #ccc;
+      }
+
+      .number-item.hadiah {
+        background-color: #fff3cd;
+        border-color: var(--hadiah-gold);
+        color: #b38800;
+        font-weight: bold;
+      }
+      .number-item.hadiah.pulled {
+        background-color: var(--danger-red);
+        color: white;
+        opacity: 1;
+        text-decoration: none;
+        border-color: #c82333;
+      }
+
+      /* --- POPUP HADIAH --- */
+      #jackpot-popup {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        visibility: hidden;
+        opacity: 0;
+        transition: visibility 0s, opacity 0.5s ease-out;
+      }
+
+      #jackpot-popup.show {
+        visibility: visible;
+        opacity: 1;
+      }
+
+      .popup-content {
+        background: linear-gradient(145deg, #1abc9c, #16a085);
+        padding: 50px;
+        border-radius: 15px;
+        box-shadow: 0 0 50px 15px rgba(26, 188, 156, 0.5);
+        animation: zoomIn 0.8s ease-out;
+        border: 5px solid white;
+        color: white;
+        max-width: 90%;
+      }
+
+      .popup-content h2 {
+        font-size: 3.5em;
+        margin-bottom: 20px;
+        color: white;
+        text-shadow: 2px 2px #0e665d;
+        font-weight: 800;
+      }
+
+      .popup-content button {
+        background-color: white;
+        color: #16a085;
+        border: none;
+        padding: 15px 30px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: 600;
+        font-size: 1.2em;
+        transition: background-color 0.3s, transform 0.2s;
+        margin-top: 20px;
+      }
+
+      /* --- Tombol Reset Game --- */
+      #reset-gacha-btn {
+        background-color: var(--danger-red);
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
+        transition: background-color 0.2s;
+        margin-top: 30px;
+      }
+
+      /* ========================================================= */
+      /* --- RESPONSIVE CSS (MOBILE VIEW) --- */
+      /* ========================================================= */
+
+      @media (max-width: 768px) {
+        body {
+          padding: 10px;
+        }
+        #main-container {
+          padding: 15px;
+          border-radius: 10px;
+        }
+        h1 {
+          font-size: 1.8em;
+          margin-bottom: 20px;
+        }
+
+        /* Koin Info */
+        #koin-info-container {
+          flex-direction: column;
+          padding: 15px;
+        }
+        #koin-display {
+          font-size: 1.3em;
+          margin-bottom: 10px;
+        }
+        #cari-koin-btn {
+          width: 100%;
+          padding: 12px;
+        }
+
+        /* Tombol Spin */
+        #button-container {
+          flex-direction: column; /* Tombol spin ditumpuk vertikal */
+          gap: 15px;
+        }
+        .pull-button {
+          padding: 15px 30px;
+          font-size: 1.1em;
+          width: 100%; /* Lebar penuh */
+        }
+
+        /* Angka Hasil */
+        #main-spinning-slot {
+          font-size: 4em; /* Slot utama dikecilkan */
+          padding: 10px 30px;
+        }
+        #multi-result-display {
+          gap: 8px;
+        }
+        .result-item {
+          font-size: 1.1em;
+          padding: 8px 12px;
+        }
+
+        /* List Angka */
+        .list-control-group {
+          flex-direction: column; /* Kontrol list ditumpuk */
+          gap: 10px;
+        }
+        .list-control-group button {
+          width: 100%;
+          padding: 10px;
+        }
+        #nomor-list-container {
+          /* Mengurangi kolom untuk layar sangat kecil */
+          grid-template-columns: repeat(auto-fill, minmax(30px, 1fr));
+          gap: 4px;
+          padding: 10px;
+        }
+        .number-item {
+          font-size: 0.8em;
+        }
+
+        /* Popup */
+        .popup-content h2 {
+          font-size: 2.5em;
+        }
+        .popup-content button {
+          font-size: 1em;
+          padding: 10px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body onload="initGacha();">
+    <div id="main-container">
+      <h1>SISTEM GACHA ANGKA</h1>
+      <div id="koin-info-container">
+        <div style="font-size: 1.1em; font-weight: 500">
+          💰 Koin Anda: <span id="koin-display">0</span>
+        </div>
+        <button id="cari-koin-btn" onclick="window.location.href='koin.html'">
+          Cari Koin
+        </button>
+      </div>
+
+      <div id="button-container">
+        <button id="pull-one" class="pull-button" onclick="tarikGacha(1)">
+          <span>Spin 1 Kali (Biaya: 1 Koin)</span>
+        </button>
+        <button id="pull-ten" class="pull-button" onclick="tarikGacha(10)">
+          <span>Spin 10 Kali (Biaya: 10 Koin)</span>
+        </button>
+      </div>
+
+      <p id="sisa-info">
+        Total Angka Tersisa:
+        <span
+          id="angka-tersisa"
+          style="font-weight: bold; color: var(--primary-blue)"
+          >150</span
+        >
+        <button
+          id="skip-button"
+          class="pull-button"
+          onclick="skipGachaAnimation()"
+          style="display: none"
+        >
+          Lewati Animasi (Skip)
+        </button>
+      </p>
+
+      <div id="nomor-tampil-container">
+        <div
+          id="main-spinning-slot"
+          class="result-item"
+          style="display: none; opacity: 1"
+        >
+          ??
+        </div>
+        <div id="multi-result-display">
+          <p id="hasil-gacha" style="color: var(--text-muted)">
+            Pilih mode spin di atas untuk memulai.
+          </p>
+        </div>
+      </div>
+
+      <hr style="margin: 30px 0; border-color: #f0f0f0" />
+
+      <button
+        id="toggle-list-button"
+        class="pull-button"
+        onclick="toggleNumberList()"
+      >
+        Tampilkan Daftar Hadiah (150 Tersisa)
+      </button>
+
+      <div class="list-control-group" id="list-controls">
+        <button id="sort-list-button" onclick="sortNumberList()">
+          Urutkan Daftar (1, 2, 3..)
+        </button>
+        <button id="full-shuffle-button" onclick="fullShuffleList()">
+          Acak Penuh (Semua 150)
+        </button>
+        <button id="toggle-hadiah-group" onclick="toggleHadiahPosition()">
+          Hadiah di Bawah (Grup)
+        </button>
+      </div>
+
+      <div id="nomor-list-container-wrapper">
+        <h2 style="color: var(--text-dark); margin-top: 25px; font-size: 1.5em">
+          Daftar Angka (Hadiah: 5, 50, 55)
+        </h2>
+        <div id="nomor-list-container"></div>
+      </div>
+
+      <button id="reset-gacha-btn" onclick="resetGachaNumbers()">
+        Reset Daftar Angka (150)
+      </button>
+
+      <div id="jackpot-popup">
+        <div class="popup-content">
+          <h2>🎉 HADIAH DIDAPATKAN! 🎉</h2>
+          <p style="font-size: 1.5em; font-weight: 500">
+            Anda beruntung! Periksa hasil spin di atas dan daftar angka.
+          </p>
+          <button
+            onclick="document.getElementById('jackpot-popup').classList.remove('show')"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      // --- KONFIGURASI DAN INITIATION ---
+      const ANGKA_HADIAH = [5, 50, 55];
+      const MAX_ANGKA = 150;
+      const DURASI_PUTAR_PERTAMA = 3000;
+      const DURASI_PUTAR_SELANJUTNYA = 1000;
+      const DURASI_JEDA_ANTAR_TARIK = 1000;
+      const INTERVAL_PUTAR_MS = 50;
+
+      let availableNumbers = Array.from({ length: MAX_ANGKA }, (_, i) => i + 1);
+      let intervalID = null;
+      let animationTimeoutID = null;
+      let currentPullResults = [];
+      let currentDisplayOrder = [];
+      let hadiahPosition = "top";
+
+      // --- INITIATION FUNCTION ---
+      function initGacha() {
+        if (localStorage.getItem("userKoin") === null) {
+          localStorage.setItem("userKoin", 0);
+        }
+        if (localStorage.getItem("availableNumbers")) {
+          availableNumbers = JSON.parse(
+            localStorage.getItem("availableNumbers")
+          );
+        } else {
+          localStorage.setItem(
+            "availableNumbers",
+            JSON.stringify(availableNumbers)
+          );
+        }
+
+        renderNumberList();
+        updateKoinDisplay();
+        checkSpinButtons();
+      }
+
+      // --- LOGIKA KOIN & LOCAL STORAGE ---
+      function getKoin() {
+        return parseInt(localStorage.getItem("userKoin")) || 0;
+      }
+      function setKoin(amount) {
+        localStorage.setItem("userKoin", amount);
+        updateKoinDisplay();
+        checkSpinButtons();
+      }
+      function updateKoinDisplay() {
+        document.getElementById("koin-display").textContent = getKoin();
+      }
+      function checkSpinButtons() {
+        const currentKoin = getKoin();
+        document.getElementById("pull-one").disabled = currentKoin < 1;
+        document.getElementById("pull-ten").disabled = currentKoin < 10;
+      }
+
+      // --- FITUR RESET GACHA BARU ---
+      function resetGachaNumbers() {
+        const confirmReset = confirm(
+          "Apakah Anda yakin ingin me-reset SEMUA angka gacha menjadi 150 penuh? (Koin tidak akan terpengaruh)"
+        );
+
+        if (confirmReset) {
+          availableNumbers = Array.from({ length: MAX_ANGKA }, (_, i) => i + 1);
+          localStorage.setItem(
+            "availableNumbers",
+            JSON.stringify(availableNumbers)
+          );
+
+          document.getElementById("multi-result-display").innerHTML =
+            "<p style='color: var(--success-green); font-weight: bold;'>✅ Daftar Angka Gacha berhasil di-reset menjadi 150!</p>";
+
+          renderNumberList();
+          updateSisaAngka();
+          checkSpinButtons();
+        }
+      }
+
+      // --- CORE GACHA LOGIC ---
+      function tarikGacha(jumlahTarikan) {
+        const biaya = jumlahTarikan;
+        let currentKoin = getKoin();
+
+        if (currentKoin < biaya) {
+          document.getElementById(
+            "multi-result-display"
+          ).innerHTML = `<p style='color: var(--danger-red); font-weight: bold;'>⚠️ Koin tidak cukup! Butuh ${biaya} Koin.</p>`;
+          return;
+        }
+
+        if (availableNumbers.length < 1) {
+          document.getElementById("multi-result-display").innerHTML =
+            "<p style='color: var(--danger-red); font-weight: bold;'>🛑 Semua angka sudah ditarik! Silakan Reset Daftar Angka di bawah.</p>";
+          return;
+        }
+
+        setKoin(currentKoin - biaya);
+
+        document.getElementById("multi-result-display").innerHTML = "";
+        document.getElementById("main-spinning-slot").style.display = "flex";
+
+        const tarikanAktual = Math.min(jumlahTarikan, availableNumbers.length);
+
+        document.getElementById("pull-one").disabled = true;
+        document.getElementById("pull-ten").disabled = true;
+        document.getElementById("skip-button").style.display = "inline-flex";
+        document.getElementById("skip-button").textContent =
+          "Lewati Animasi (Skip)";
+
+        const mainSlot = document.getElementById("main-spinning-slot");
+        const displayContainer = document.getElementById(
+          "multi-result-display"
+        );
+
+        mainSlot.style.fontSize = jumlahTarikan === 1 ? "6em" : "2.5em";
+        mainSlot.style.padding =
+          jumlahTarikan === 1 ? "15px 45px" : "10px 25px";
+
+        displayContainer.innerHTML = `<p id="hasil-gacha" style="color: var(--text-muted);">Memproses spin...</p>`;
+
+        currentPullResults = [];
+
+        for (let i = 0; i < tarikanAktual; i++) {
+          const randomIndex = Math.floor(
+            Math.random() * availableNumbers.length
+          );
+          const nomorAcakFinal = availableNumbers[randomIndex];
+
+          availableNumbers.splice(randomIndex, 1);
+          currentPullResults.push(nomorAcakFinal);
+        }
+
+        localStorage.setItem(
+          "availableNumbers",
+          JSON.stringify(availableNumbers)
+        );
+
+        updateSisaAngka();
+        runSequentialPull(mainSlot, currentPullResults);
+      }
+
+      function finishPullCleanup(hasilAkhir) {
+        let adaHadiah = hasilAkhir.some((nomor) =>
+          ANGKA_HADIAH.includes(nomor)
+        );
+
+        document.getElementById("pull-one").disabled = false;
+        document.getElementById("pull-ten").disabled = false;
+        document.getElementById("skip-button").style.display = "none";
+
+        checkSpinButtons();
+
+        if (adaHadiah) {
+          document.getElementById("jackpot-popup").classList.add("show");
+        }
+
+        const displayContainer = document.getElementById(
+          "multi-result-display"
+        );
+        const tarikanAktual = hasilAkhir.length;
+        const sisa = availableNumbers.length;
+        let peluangText = sisa > 0 ? `| ${sisa} Angka Tersisa` : "";
+
+        displayContainer.insertAdjacentHTML(
+          "beforeend",
+          `<p id="hasil-gacha" style="color: var(--text-muted); margin-top: 10px;">Selesai! <b>${tarikanAktual}</b> Spin. ${peluangText}</p>`
+        );
+      }
+
+      function prosesHasil(hasilAkhir) {
+        const displayContainer = document.getElementById(
+          "multi-result-display"
+        );
+        document.getElementById("main-spinning-slot").style.display = "none";
+        displayContainer.innerHTML = "";
+
+        hasilAkhir.forEach((nomor, index) => {
+          const isJackpot = ANGKA_HADIAH.includes(nomor);
+
+          const resultItem = document.createElement("div");
+          resultItem.classList.add("result-item");
+          resultItem.textContent = nomor;
+          resultItem.style.animationDelay = `${index * 0.1}s`;
+
+          if (isJackpot) {
+            resultItem.classList.add("hadiah");
+          }
+
+          displayContainer.appendChild(resultItem);
+
+          const elemDiList = document.getElementById("num-" + nomor);
+          if (elemDiList) {
+            elemDiList.classList.add("pulled");
+            if (isJackpot) {
+              elemDiList.classList.remove("hadiah");
+            }
+          }
+        });
+
+        setTimeout(() => {
+          finishPullCleanup(hasilAkhir);
+        }, hasilAkhir.length * 100 + 500);
+      }
+
+      function runSequentialPull(
+        spinningElement,
+        hasilFinal,
+        index = 0,
+        resultsArray = []
+      ) {
+        if (currentPullResults.length === 0) return;
+
+        if (index >= hasilFinal.length) {
+          prosesHasil(resultsArray);
+          return;
+        }
+
+        const currentResult = hasilFinal[index];
+        const duration =
+          index === 0 ? DURASI_PUTAR_PERTAMA : DURASI_PUTAR_SELANJUTNYA;
+
+        spinningElement.classList.add("spinning");
+        spinningElement.classList.remove("hadiah");
+        spinningElement.textContent = "??";
+
+        intervalID = setInterval(() => {
+          let nomorDisplay = Math.floor(Math.random() * MAX_ANGKA) + 1;
+          spinningElement.textContent = String(nomorDisplay);
+        }, INTERVAL_PUTAR_MS);
+
+        animationTimeoutID = setTimeout(() => {
+          clearInterval(intervalID);
+          intervalID = null;
+
+          spinningElement.classList.remove("spinning");
+          spinningElement.textContent = currentResult;
+          if (ANGKA_HADIAH.includes(currentResult)) {
+            spinningElement.classList.add("hadiah");
+          }
+
+          resultsArray.push(currentResult);
+
+          const isJackpot = ANGKA_HADIAH.includes(currentResult);
+          const elemDiList = document.getElementById("num-" + currentResult);
+
+          if (elemDiList) {
+            elemDiList.classList.add("pulled");
+            if (isJackpot) {
+              elemDiList.classList.remove("hadiah");
+            }
+          }
+
+          if (index < hasilFinal.length - 1) {
+            animationTimeoutID = setTimeout(() => {
+              runSequentialPull(
+                spinningElement,
+                hasilFinal,
+                index + 1,
+                resultsArray
+              );
+            }, DURASI_JEDA_ANTAR_TARIK);
+          } else {
+            animationTimeoutID = setTimeout(() => {
+              prosesHasil(resultsArray);
+            }, 500);
+          }
+        }, duration);
+      }
+
+      function skipGachaAnimation() {
+        if (currentPullResults.length === 0) return;
+
+        if (intervalID !== null) {
+          clearInterval(intervalID);
+          intervalID = null;
+        }
+        if (animationTimeoutID !== null) {
+          clearTimeout(animationTimeoutID);
+          animationTimeoutID = null;
+        }
+
+        prosesHasil(currentPullResults);
+      }
+
+      // --- Logic Daftar Angka ---
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+      }
+      function updateSisaAngka() {
+        document.getElementById("angka-tersisa").textContent =
+          availableNumbers.length;
+        const button = document.getElementById("toggle-list-button");
+        const listWrapper = document.getElementById(
+          "nomor-list-container-wrapper"
+        );
+        const buttonText = `Daftar Hadiah (${availableNumbers.length} Tersisa)`;
+        if (
+          listWrapper.style.display === "none" ||
+          listWrapper.style.display === ""
+        ) {
+          button.textContent = `Tampilkan ${buttonText}`;
+        } else {
+          button.textContent = `Sembunyikan ${buttonText}`;
+        }
+      }
+      function toggleNumberList() {
+        const listWrapper = document.getElementById(
+          "nomor-list-container-wrapper"
+        );
+        const listControls = document.getElementById("list-controls");
+        if (
+          listWrapper.style.display === "none" ||
+          listWrapper.style.display === ""
+        ) {
+          listWrapper.style.display = "block";
+          listControls.style.display = "flex";
+        } else {
+          listWrapper.style.display = "none";
+          listControls.style.display = "none";
+        }
+        updateSisaAngka();
+      }
+      function sortNumberList() {
+        currentDisplayOrder = Array.from(
+          { length: MAX_ANGKA },
+          (_, i) => i + 1
+        );
+        renderListBasedOnOrder(currentDisplayOrder);
+      }
+      function fullShuffleList() {
+        currentDisplayOrder = Array.from(
+          { length: MAX_ANGKA },
+          (_, i) => i + 1
+        );
+        shuffleArray(currentDisplayOrder);
+        renderListBasedOnOrder(currentDisplayOrder);
+      }
+      function groupShuffleList() {
+        const allDisplayedNumbers = Array.from(
+          { length: MAX_ANGKA },
+          (_, i) => i + 1
+        );
+        const hadiah = allDisplayedNumbers.filter((num) =>
+          ANGKA_HADIAH.includes(num)
+        );
+        let normalNumbers = allDisplayedNumbers.filter(
+          (num) => !ANGKA_HADIAH.includes(num)
+        );
+        shuffleArray(normalNumbers);
+        if (hadiahPosition === "top") {
+          currentDisplayOrder = hadiah.concat(normalNumbers);
+        } else {
+          currentDisplayOrder = normalNumbers.concat(hadiah);
+        }
+        renderListBasedOnOrder(currentDisplayOrder);
+      }
+      function toggleHadiahPosition() {
+        const button = document.getElementById("toggle-hadiah-group");
+        if (hadiahPosition === "top") {
+          hadiahPosition = "bottom";
+          button.textContent = "Hadiah di Atas (Grup)";
+        } else {
+          hadiahPosition = "top";
+          button.textContent = "Hadiah di Bawah (Grup)";
+        }
+        groupShuffleList();
+      }
+      function renderNumberList() {
+        sortNumberList();
+        updateSisaAngka();
+      }
+      function renderListBasedOnOrder(orderArray) {
+        const container = document.getElementById("nomor-list-container");
+        container.innerHTML = "";
+        orderArray.forEach((i) => {
+          const numElement = document.createElement("div");
+          numElement.classList.add("number-item");
+          numElement.id = "num-" + i;
+          numElement.textContent = i;
+          numElement.style.textAlign = "center";
+
+          const isJackpot = ANGKA_HADIAH.includes(i);
+          if (isJackpot) {
+            numElement.classList.add("hadiah");
+          }
+
+          if (!availableNumbers.includes(i)) {
+            numElement.classList.add("pulled");
+            if (isJackpot) {
+              numElement.classList.remove("hadiah");
+            }
+          }
+          container.appendChild(numElement);
+        });
+      }
+    </script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </body>
+</html>
